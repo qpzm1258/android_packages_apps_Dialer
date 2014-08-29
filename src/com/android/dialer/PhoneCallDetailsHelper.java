@@ -36,6 +36,9 @@ import com.android.dialer.calllog.ContactInfo;
 import com.android.dialer.calllog.PhoneNumberDisplayHelper;
 import com.android.dialer.calllog.PhoneNumberUtilsWrapper;
 
+import android.mokee.util.MoKeeUtils;
+import android.mokee.location.PhoneLocation;
+
 /**
  * Helper class to fill in the views in {@link PhoneCallDetailsViews}.
  */
@@ -108,7 +111,7 @@ public class PhoneCallDetailsHelper {
             nameText = displayNumber;
             if (TextUtils.isEmpty(details.geocode)
                     || mPhoneNumberUtilsWrapper.isVoicemailNumber(details.number)) {
-                numberText = mResources.getString(R.string.call_log_empty_geocode);
+                numberText = "";
             } else {
                 numberText = details.geocode;
             }
@@ -121,10 +124,18 @@ public class PhoneCallDetailsHelper {
             labelText = TextUtils.isEmpty(numberFormattedLabel) ? numberText :
                     numberFormattedLabel;
         }
+	if(MoKeeUtils.isChineseLanguage() && !MoKeeUtils.isTWLanguage()) {
+	CharSequence PhoneLocationStr = PhoneLocation.getCityFromPhone(String.valueOf(details.number)); 
+    	views.locationView.setText(PhoneLocationStr); 
+       	views.locationView.setVisibility(TextUtils.isEmpty(PhoneLocationStr) ? View.INVISIBLE : View.VISIBLE); 
+        } else { 
+        views.locationView.setText(details.geocode); 
+        views.locationView.setVisibility(TextUtils.isEmpty(details.geocode) ? View.INVISIBLE : View.VISIBLE); 
+        } 
 
         views.nameView.setText(nameText);
         views.labelView.setText(labelText);
-        views.labelView.setVisibility(TextUtils.isEmpty(labelText) ? View.GONE : View.VISIBLE);
+        views.labelView.setVisibility(TextUtils.isEmpty(labelText) || labelText.equals(details.geocode) ? View.GONE : View.VISIBLE);
     }
 
     /**

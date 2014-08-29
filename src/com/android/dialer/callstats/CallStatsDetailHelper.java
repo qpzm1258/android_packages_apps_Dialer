@@ -25,6 +25,9 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
+import android.mokee.util.MoKeeUtils;
+import android.mokee.location.PhoneLocation;
+
 import com.android.dialer.R;
 import com.android.dialer.calllog.PhoneNumberDisplayHelper;
 import com.android.dialer.calllog.PhoneNumberUtilsWrapper;
@@ -66,7 +69,7 @@ public class CallStatsDetailHelper {
             nameText = displayNumber;
             if (TextUtils.isEmpty(details.geocode)
                     || mPhoneNumberUtilsWrapper.isVoicemailNumber(details.number)) {
-                numberText = mResources.getString(R.string.call_log_empty_geocode);
+                numberText = "";
             } else {
                 numberText = details.geocode;
             }
@@ -95,12 +98,22 @@ public class CallStatsDetailHelper {
         } else if (type == Calls.MISSED_TYPE) {
             missed = ratio;
         }
+	
+	if(MoKeeUtils.isChineseLanguage() && !MoKeeUtils.isTWLanguage()) {
+	CharSequence PhoneLocationStr = PhoneLocation.getCityFromPhone(String.valueOf(details.number)); 
+    	views.locationView.setText(PhoneLocationStr); 
+       	views.locationView.setVisibility(TextUtils.isEmpty(PhoneLocationStr) ? View.INVISIBLE : View.VISIBLE); 
+        } else { 
+        views.locationView.setText(details.geocode); 
+        views.locationView.setVisibility(TextUtils.isEmpty(details.geocode) ? View.INVISIBLE : View.VISIBLE); 
+        } 
 
         views.barView.setRatios(in, out, missed);
         views.nameView.setText(nameText);
         views.numberView.setText(numberText);
+	views.numberView.setVisibility(TextUtils.isEmpty(numberText) || numberText.equals(details.geocode) ? View.GONE : View.VISIBLE);
         views.labelView.setText(labelText);
-        views.labelView.setVisibility(TextUtils.isEmpty(labelText) ? View.GONE : View.VISIBLE);
+        views.labelView.setVisibility(TextUtils.isEmpty(labelText) || labelText.equals(details.geocode) ? View.GONE : View.VISIBLE);
 
         if (byDuration && type == Calls.MISSED_TYPE) {
             views.percentView.setText(getCallCountString(mResources, details.missedCount));
